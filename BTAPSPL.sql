@@ -1,0 +1,86 @@
+﻿CREATE DATABASE QL_SV;
+GO
+
+USE QL_SV;
+GO
+
+CREATE TABLE SV(
+    MaSV NVARCHAR(10) PRIMARY KEY,
+    HoTen NVARCHAR(50),
+    NgaySinh DATE,
+    Lop NVARCHAR(20)
+);
+
+CREATE TABLE MonHoc(
+    MSMonHoc NVARCHAR(10) PRIMARY KEY,
+    TenMonHoc NVARCHAR(50),
+    SoTinChi INT,
+    TinhChat NVARCHAR(20)
+);
+
+CREATE TABLE Diem(
+    MaSV NVARCHAR(10),
+    MSMonHoc NVARCHAR(10),
+    Diem FLOAT,
+    PRIMARY KEY (MaSV, MSMonHoc),
+    FOREIGN KEY (MaSV) REFERENCES SV(MaSV),
+    FOREIGN KEY (MSMonHoc) REFERENCES MonHoc(MSMonHoc)
+);
+
+INSERT INTO SV 
+	VALUES('SV001',N'Hữu Đạt','2006-01-10','TIN18A'),
+			('SV002','Thanh Huong','2006-02-11','TIN18A1')
+
+INSERT INTO MonHoc
+	VALUES('001',N'Hệ QTCSDL',3,NULL),
+			('003','Toan',4,NULL)
+
+
+INSERT INTO Diem
+	VALUES('SV001','001',9.9),
+			('SV002','001',4)
+
+SELECT * FROM SV
+SELECT * FROM MonHoc
+SELECT * FROM Diem
+
+--
+SELECT * FROM SV 
+	WHERE Lop = 'TIN18A';
+
+--
+SELECT MaSV FROM Diem 
+	WHERE Diem < 5;
+
+--
+SELECT SV.MaSV, SV.HoTen, SV.Lop, MonHoc.TenMonHoc, Diem.Diem
+FROM SV
+JOIN Diem ON SV.MaSV = Diem.MaSV
+JOIN MonHoc ON Diem.MSMonHoc = MonHoc.MSMonHoc
+WHERE MonHoc.TenMonHoc = N'Hệ QTCSDL'
+ORDER BY SV.MaSV ASC;
+
+--
+SELECT MSMonHoc TenMonHoc FROM MonHoc
+	WHERE MSMonHoc NOT IN(
+		SELECT DISTINCT MSMonHoc
+		FROM Diem
+		JOIN SV ON SV.MaSV = Diem.MaSV
+)
+
+SELECT TenMonHoc FROM MonHoc
+	WHERE NOT EXISTS(
+		SELECT 1
+		FROM Diem
+		WHERE Diem.MSMonHoc=MonHoc.MSMonHoc
+)
+
+--
+CREATE VIEW ThongKe AS
+SELECT SV.MaSV, SV.HoTen, SV.Lop, Diem.MSMonHoc, Diem.Diem
+FROM SV
+JOIN Diem ON SV.MaSV = Diem.MaSV
+WHERE SV.Lop = 'MMT18A';
+GO
+
+SELECT * FROM ThongKe;
